@@ -43,6 +43,71 @@ class AudioAlertService {
   }
 
   // ============================================================
+  // SUCCESS CHIME — Uplifting 3-Tone Authorization Melody
+  // ============================================================
+  playSuccessSound() {
+    if (!this.soundEnabled) return;
+    try {
+      this.initAudio();
+      if (!this.audioCtx) return;
+      const now = this.audioCtx.currentTime;
+      const notes = [523.25, 659.25, 783.99]; // C5, E5, G5 major triad
+
+      notes.forEach((freq, i) => {
+        const osc = this.audioCtx.createOscillator();
+        const gain = this.audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(this.audioCtx.destination);
+
+        const t = now + i * 0.09;
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t);
+
+        gain.gain.setValueAtTime(0.001, t);
+        gain.gain.linearRampToValueAtTime(0.45, t + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+
+        osc.start(t);
+        osc.stop(t + 0.35);
+      });
+    } catch (err) {
+      console.warn('Success sound failed:', err);
+    }
+  }
+
+  // ============================================================
+  // ERROR BUZZER — Low Reject Tone for Incorrect OTP
+  // ============================================================
+  playErrorBuzzer() {
+    if (!this.soundEnabled) return;
+    try {
+      this.initAudio();
+      if (!this.audioCtx) return;
+      const now = this.audioCtx.currentTime;
+
+      for (let i = 0; i < 2; i++) {
+        const osc = this.audioCtx.createOscillator();
+        const gain = this.audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(this.audioCtx.destination);
+
+        const t = now + i * 0.14;
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(160, t);
+
+        gain.gain.setValueAtTime(0.001, t);
+        gain.gain.linearRampToValueAtTime(0.4, t + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
+
+        osc.start(t);
+        osc.stop(t + 0.12);
+      }
+    } catch (err) {
+      console.warn('Error buzzer failed:', err);
+    }
+  }
+
+  // ============================================================
   // WARNING ALERT — High Gain Rising Double-Beep Chime
   // ============================================================
   playWarningSound() {

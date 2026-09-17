@@ -169,37 +169,52 @@ export const Header = () => {
             )}
           </div>
 
-          {/* User Profile */}
-          <div className="relative">
-            <button
-              onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="flex items-center gap-2 p-1.5 pl-2.5 bg-navy-850 hover:bg-cyan-500/10 border border-cyan-500/30 rounded-xl transition-all"
-            >
-              <div className="text-right hidden sm:block">
-                <p className="text-xs font-bold text-white leading-tight">{user.name}</p>
-                <p className="text-[10px] text-cyan-400 font-mono-code leading-tight">Engineer</p>
-              </div>
-              <img src={user.avatar} alt={user.name} className="w-7 h-7 rounded-lg object-cover border border-cyan-400" />
-            </button>
+          {/* User Profile / Auth Action */}
+          {user && user.isLoggedIn ? (
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="flex items-center gap-2 p-1.5 pl-2.5 bg-navy-850 hover:bg-cyan-500/10 border border-cyan-500/30 rounded-xl transition-all"
+              >
+                <div className="text-right hidden sm:block">
+                  <p className="text-xs font-bold text-white leading-tight">{user.name}</p>
+                  <p className="text-[10px] text-cyan-400 font-mono-code leading-tight">Verified Engineer</p>
+                </div>
+                <img src={user.avatar} alt={user.name} className="w-7 h-7 rounded-lg object-cover border border-cyan-400 shadow-[0_0_8px_rgba(0,240,255,0.4)]" />
+              </button>
 
-            {showProfileMenu && (
-              <div className="absolute right-0 mt-2 w-60 bg-navy-900 border border-cyan-500/30 rounded-2xl shadow-2xl z-50 p-4 backdrop-blur-2xl">
-                <div className="pb-3 border-b border-cyan-500/20 mb-3">
-                  <p className="font-tech text-sm font-bold text-white">{user.name}</p>
-                  <p className="text-xs text-cyan-400 font-mono-code truncate">{user.email}</p>
-                  <span className="inline-block mt-1.5 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-[10px] text-emerald-400 rounded">{user.clearanceLevel}</span>
+              {showProfileMenu && (
+                <div className="absolute right-0 mt-2 w-64 bg-navy-900 border border-cyan-500/30 rounded-2xl shadow-2xl z-50 p-4 backdrop-blur-2xl">
+                  <div className="pb-3 border-b border-cyan-500/20 mb-3">
+                    <p className="font-tech text-sm font-bold text-white">{user.name}</p>
+                    <p className="text-xs text-cyan-400 font-mono-code truncate">{user.email}</p>
+                    <span className="inline-block mt-1.5 px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/40 text-[10px] text-emerald-300 rounded font-bold">
+                      {user.clearanceLevel || 'Level 4 Defense Security'}
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    <button onClick={() => { setActiveTab('dashboard'); setShowProfileMenu(false); }} className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-lg flex items-center gap-2">
+                      <Shield className="w-3.5 h-3.5 text-cyan-400" /> Command Dashboard
+                    </button>
+                    <button onClick={() => { setActiveTab('settings'); setShowProfileMenu(false); }} className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-lg flex items-center gap-2">
+                      <User className="w-3.5 h-3.5 text-cyan-400" /> Account & Security
+                    </button>
+                    <button onClick={() => { logout(); setActiveTab('login'); setShowProfileMenu(false); }} className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 rounded-lg flex items-center gap-2 font-bold">
+                      <LogOut className="w-3.5 h-3.5" /> Sign Out
+                    </button>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <button onClick={() => { setActiveTab('settings'); setShowProfileMenu(false); }} className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-cyan-500/10 hover:text-cyan-400 rounded-lg flex items-center gap-2">
-                    <User className="w-3.5 h-3.5 text-cyan-400" /> Account Settings
-                  </button>
-                  <button onClick={() => { logout(); setActiveTab('login'); setShowProfileMenu(false); }} className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 rounded-lg flex items-center gap-2">
-                    <LogOut className="w-3.5 h-3.5" /> Sign Out
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => setActiveTab('login')}
+              className="px-3 py-1.5 rounded-xl text-xs font-tech font-bold flex items-center gap-1.5 bg-gradient-to-r from-electric-bright to-cyan-400 text-navy-950 shadow-glow-cyan hover:brightness-110 transition-all cursor-pointer"
+            >
+              <User className="w-3.5 h-3.5" />
+              Sign In / Register
+            </button>
+          )}
         </div>
       </div>
     </header>

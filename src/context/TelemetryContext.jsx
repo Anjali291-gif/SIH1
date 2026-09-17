@@ -220,6 +220,15 @@ export const TelemetryProvider = ({ children }) => {
     executeTourStep(Math.max(0, tourStep - 2));
   };
 
+  const jumpToTourStep = (stepNumber) => {
+    if (tourTimeoutRef.current) clearTimeout(tourTimeoutRef.current);
+    audioService.stopVoice();
+    audioService.stopSiren();
+    setIsTourPaused(false);
+    isTourPausedRef.current = false;
+    executeTourStep(Math.max(0, Math.min(TOUR_STEPS.length - 1, stepNumber - 1)));
+  };
+
   // Main Telemetry stream tick (every 2s)
   useEffect(() => {
     if (!isSimulating && !demoMode) return;
@@ -405,8 +414,10 @@ export const TelemetryProvider = ({ children }) => {
       tourStep,
       totalTourSteps: TOUR_STEPS.length,
       tourText,
+      tourStepsList: TOUR_STEPS,
       nextTourStep,
       prevTourStep,
+      jumpToTourStep,
       isTourPaused,
       togglePauseTour,
       tourPace,

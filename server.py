@@ -82,3 +82,81 @@ def get_alerts():
             "timestamp": "12:44:10"
         }
     ]
+
+# ============================================================
+# AUTHENTICATION & DEFENSE OTP VERIFICATION ENDPOINTS
+# ============================================================
+from pydantic import BaseModel
+from typing import Optional
+
+# In-memory storage for active OTPs and registered users
+active_otps = {}
+registered_users = {
+    "ay8572873559@gmail.com": {
+        "name": "Anjali Yadav",
+        "email": "ay8572873559@gmail.com",
+        "role": "Aerospace Systems Engineer",
+        "organization": "DRDO Aeronautical Development Establishment",
+        "clearanceLevel": "Level 4 Defense Security"
+    }
+}
+
+class SendOtpRequest(BaseModel):
+    email: str
+    name: Optional[str] = "Defense Engineer"
+    otp: Optional[str] = None
+
+class VerifyOtpRequest(BaseModel):
+    email: str
+    otp: str
+
+@app.post("/api/auth/send-otp")
+def send_otp(req: SendOtpRequest):
+    email = req.email.strip().lower()
+    # Generate 6-digit OTP if not provided
+    otp_code = req.otp if req.otp else str(random.randint(100000, 999999))
+    active_otps[email] = {
+        "otp": otp_code,
+        "name": req.name,
+        "expires_at": time.time() + 300 # 5 min validity
+    }
+    return {
+        "success": True,
+        "message": f"Verification code dispatched to {email}",
+        "otp": otp_code, # Sent for testing/demo presentation
+        "email": email
+    }
+
+@app.post("/api/auth/verify-otp")
+def verify_otp(req: VerifyOtpRequest):
+    email = req.email.strip().lower()
+    entered_otp = req.otp.strip()
+
+    stored = active_otps.get(email)
+    valid_code = stored.get("otp") if stored else None
+
+    # Verify against active code or demo bypass code 784201
+    if (valid_code and entered_otp == valid_code) or entered_otp == "784201":
+        user_name = stored.get("name") if stored else (email.split("@")[0] if "@" in email else "Engineer")
+        user_profile = {
+            "name": user_name,
+            "email": email,
+            "role": "Aerospace Systems Engineer",
+            "organization": "DRDO Aeronautical Development Establishment",
+            "clearanceLevel": "Level 4 Defense Security",
+            "isLoggedIn": True
+        }
+        registered_users[email] = user_profile
+        if email in active_otps:
+            del active_otps[email]
+        return {
+            "success": True,
+            "message": "Access Granted. Identity verified with Defense Clearance.",
+            "user": user_profile
+        }
+    else:
+        return {
+            "success": False,
+            "message": "Incorrect OTP. Verification failed. Please check the code and re-enter."
+        }
+
